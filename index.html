@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tactical DCA Strategy PWA</title>
+  <title>Solana Tactical DCA PWA</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <style>
@@ -49,28 +49,28 @@
 
     .controls {
       display: flex;
-      gap: 8px;
-      width: 100%;
-    }
-
-    select, button {
+      justify-content: space-between;
+      align-items: center;
       background-color: var(--bg-card);
-      color: var(--text-main);
-      border: 1px solid var(--border);
-      padding: 12px;
+      padding: 12px 16px;
       border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
+      border: 1px solid var(--border);
     }
 
-    select {
-      flex: 2;
+    .asset-title {
+      font-weight: bold;
+      font-size: 1.1rem;
     }
 
     button {
-      flex: 1;
       background-color: var(--accent-blue);
+      color: var(--text-main);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.9rem;
       font-weight: bold;
+      cursor: pointer;
     }
 
     button:hover {
@@ -133,13 +133,9 @@
 </head>
 <body>
   <header>
-    <h1>Estrategia Táctica (EMA + RSI + OBV)</h1>
+    <h1>Estrategia Táctica (Solana)</h1>
     <div class="controls">
-      <select id="symbolSelect">
-        <option value="SOLUSDT">Solana (SOL/USDT)</option>
-        <option value="BTCUSDT">Bitcoin (BTC/USDT)</option>
-        <option value="ETHUSDT">Ethereum (ETH/USDT)</option>
-      </select>
+      <span class="asset-title">🪙 Solana (SOL/USD)</span>
       <button id="analyzeBtn">Actualizar</button>
     </div>
   </header>
