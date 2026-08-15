@@ -1,6 +1,6 @@
 const symbol = 'SOLUSDT';
   const interval = '4h';
-  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=1000`;
+  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=500`;
 
   console.log(`[Scanner] Descargando histórico optimizado de ${symbol} (${interval}) desde Binance...`);
 
