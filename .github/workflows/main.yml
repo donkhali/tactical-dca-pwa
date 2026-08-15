@@ -2,7 +2,7 @@ name: SOLANA Tactical Scanner
 
 on:
   schedule:
-    - cron: '0 */4 * * *'
+    - cron: '0 */4 * * x'
   workflow_dispatch:
 
 jobs:
