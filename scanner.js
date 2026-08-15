@@ -65,74 +65,63 @@ const Indicators = {
 const runScanner = async () => {
   const symbol = 'PAXGUSDT';
   const interval = '4h';
-  let allCandles = [];
-  let endTime = undefined;
+  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=1000`;
 
-  console.log(`[Scanner] Descargando histórico de ${symbol} (${interval})...`);
+  console.log(`[Scanner] Descargando histórico de ${symbol} (${interval}) desde Binance...`);
 
-  // Paginación segura para obtener múltiples bloques de velas en Binance
-  for (let i = 0; i < 5; i++) {
-    let url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=1000`;
-    if (endTime) {
-      url += `&endTime=${endTime}`;
-    }
-
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-      
-      if (!Array.isArray(data) || data.length === 0) {
-        console.log(`[Scanner] No se obtuvieron más datos en la iteración ${i + 1}.`);
-        break;
-      }
-
-      allCandles = data.concat(allCandles);
-      endTime = data[0][0] - 1; // Retroceder el tiempo para el siguiente bloque
-    } catch (error) {
-      console.error("[Error] Falló la conexión con la API de Binance:", error);
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (!Array.isArray(data) || data.length === 0) {
+      console.error("[Error] La API de Binance no devolvió datos para PAXGUSDT.");
       process.exit(1);
     }
-  }
 
-  console.log(`[Scanner] Velas totales cargadas con éxito: ${allCandles.length}`);
+    console.log(`[Scanner] Velas totales cargadas con éxito: ${data.length}`);
 
-  if (allCandles.length < 200) {
-    console.error("[Error] No hay suficientes datos para calcular la EMA 200.");
+    if (data.length < 200) {
+      console.error("[Error] No hay suficientes velas (mínimo 200 requeridas para la EMA).");
+      process.exit(1);
+    }
+
+    const closes = data.map(c => parseFloat(c[4]));
+    const volumes = data.map(c => parseFloat(c[5]));
+
+    const ema200Arr = Indicators.ema(closes, 200);
+    const rsiArr = Indicators.rsi(closes, 14);
+    const obvArr = Indicators.obv(closes, volumes);
+    const obvEmaArr = Indicators.ema(obvArr, 20);
+
+    const currentClose = closes[closes.length - 1];
+    const currentEma = ema200Arr[ema200Arr.length - 1];
+    const currentRsi = rsiArr[rsiArr.length - 1];
+
+    const prevObv = obvArr[obvArr.length - 2];
+    const prevObvEma = obvEmaArr[obvEmaArr.length - 2];
+    const currObv = obvArr[obvArr.length - 1];
+    const currObvEma = obvEmaArr[obvEmaArr.length - 1];
+
+    const obvCrossover = prevObv <= prevObvEma && currObv > currObvEma;
+
+    const isDowntrend = currentClose < currentEma;
+    const condBuyDca = isDowntrend && currentRsi < 30;
+    const condSell = obvCrossover;
+
+    console.log(`--- ESTADO ACTUAL PAXG ---`);
+    console.log(`Precio: $${currentClose.toFixed(2)} | EMA 200: $${currentEma.toFixed(2)} | RSI: ${currentRsi.toFixed(2)}`);
+
+    if (condBuyDca) {
+      console.log(`🚨 [ALERTA] ¡SEÑAL DE COMPRA DCA ACTIVADA PARA PAXG!`);
+    } else if (condSell) {
+      console.log(`🚨 [ALERTA] ¡SEÑAL DE VENTA ACTIVADA PARA PAXG!`);
+    } else {
+      console.log(`⏳ Mercado Neutral. Sin acciones requeridas.`);
+    }
+
+  } catch (error) {
+    console.error("[Error crítico] Falló la ejecución del script:", error);
     process.exit(1);
-  }
-
-  const closes = allCandles.map(c => parseFloat(c[4]));
-  const volumes = allCandles.map(c => parseFloat(c[5]));
-
-  const ema200Arr = Indicators.ema(closes, 200);
-  const rsiArr = Indicators.rsi(closes, 14);
-  const obvArr = Indicators.obv(closes, volumes);
-  const obvEmaArr = Indicators.ema(obvArr, 20);
-
-  const currentClose = closes[closes.length - 1];
-  const currentEma = ema200Arr[ema200Arr.length - 1];
-  const currentRsi = rsiArr[rsiArr.length - 1];
-
-  const prevObv = obvArr[obvArr.length - 2];
-  const prevObvEma = obvEmaArr[obvEmaArr.length - 2];
-  const currObv = obvArr[obvArr.length - 1];
-  const currObvEma = obvEmaArr[obvEmaArr.length - 1];
-
-  const obvCrossover = prevObv <= prevObvEma && currObv > currObvEma;
-
-  const isDowntrend = currentClose < currentEma;
-  const condBuyDca = isDowntrend && currentRsi < 30;
-  const condSell = obvCrossover;
-
-  console.log(`--- ESTADO ACTUAL PAXG ---`);
-  console.log(`Precio: $${currentClose.toFixed(2)} | EMA 200: $${currentEma.toFixed(2)} | RSI: ${currentRsi.toFixed(2)}`);
-
-  if (condBuyDca) {
-    console.log(`🚨 [ALERTA] ¡SEÑAL DE COMPRA DCA ACTIVADA PARA PAXG!`);
-  } else if (condSell) {
-    console.log(`🚨 [ALERTA] ¡SEÑAL DE VENTA ACTIVADA PARA PAXG!`);
-  } else {
-    console.log(`⏳ Mercado Neutral. Sin acciones requeridas.`);
   }
 };
 
