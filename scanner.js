@@ -66,16 +66,18 @@ const runScanner = async () => {
   const symbol = 'SOLUSDT';
   const interval = '4h';
   let allCandles = [];
-  let endTime = undefined;
+  
+  // 4 horas en milisegundos = 4 * 60 * 60 * 1000 = 14,400,000 ms por vela.
+  // 1000 velas de 4h = 1000 * 14,400,000 = 14,400,000,000 ms por petición.
+  const limitPerRequest = 1000;
+  const totalRequests = 5; // 5 peticiones * 1000 velas = 5,000 velas objetivo
+  
+  let endTime = Date.now();
 
-  console.log(`[Scanner] Descargando 5,000 velas de ${symbol} en temporalidad de ${interval}...`);
+  console.log(`[Scanner] Descargando histórico de ${symbol} (${interval}) - Objetivo: 5,000 velas...`);
 
-  // Paginación hacia atrás para acumular los 5 bloques de 1000 velas (5,000 en total)
-  for (let i = 0; i < 5; i++) {
-    let url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=1000`;
-    if (endTime) {
-      url += `&endTime=${endTime}`;
-    }
+  for (let i = 0; i < totalRequests; i++) {
+    let url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limitPerRequest}&endTime=${endTime}`;
 
     try {
       const response = await fetch(url);
@@ -85,10 +87,13 @@ const runScanner = async () => {
         break;
       }
 
+      // Añadimos al inicio del arreglo para mantener el orden cronológico antiguo -> reciente
       allCandles = data.concat(allCandles);
-      endTime = data[0][0] - 1; 
+      
+      // Actualizamos el endTime al timestamp de apertura de la primera vela recibida menos 1ms
+      endTime = data[0][0] - 1;
     } catch (error) {
-      console.error("[Error] Falló la descarga de datos:", error);
+      console.error("[Error] Falló la descarga de datos de Binance:", error);
       process.exit(1);
     }
   }
