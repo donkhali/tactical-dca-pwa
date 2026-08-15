@@ -1,0 +1,15 @@
+{
+  "name": "Tactical DCA & OBV Strategy",
+  "short_name": "TacticalDCA",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/feathericons/feather/master/icons/trending-up.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

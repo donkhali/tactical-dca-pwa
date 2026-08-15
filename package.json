@@ -1,0 +1,12 @@
+{
+  "name": "tactical-dca-scanner",
+  "version": "1.0.0",
+  "description": "Scanner automático de estrategia DCA para PAXG con GitHub Actions",
+  "main": "scanner.js",
+  "scripts": {
+    "start": "node scanner.js"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  }
+}
