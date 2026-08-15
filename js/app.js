@@ -16,24 +16,24 @@ async function fetchMarketData() {
   signalBox.className = "signal-box signal-neutral";
   signalBox.innerText = "DESCARGANDO DATOS DE SOLANA...";
 
-  // Usamos CoinGecko para evitar bloqueos de CORS en el navegador
-  const url = 'https://api.coingecko.com/api/v3/coins/solana/market_chart?vs_currency=usd&days=365&interval=daily';
+  // Endpoint alternativo público de Binance optimizado para evitar bloqueos CORS en navegadores
+  const url = 'https://api.binance.com/api/v3/klines?symbol=SOLUSDT&interval=1d&limit=250';
 
   try {
     const response = await fetch(url);
     const data = await response.json();
     
-    if (!data.prices || data.prices.length === 0) {
+    if (!Array.isArray(data) || data.length === 0) {
       throw new Error("No hay datos disponibles");
     }
 
-    const closes = data.prices.map(item => item[1]);
-    const volumes = data.total_volumes.map(item => item[1]);
+    const closes = data.map(candle => parseFloat(candle[4]));
+    const volumes = data.map(candle => parseFloat(candle[5]));
 
     runStrategy(closes, volumes);
   } catch (error) {
     console.error("Error al obtener datos:", error);
-    signalBox.innerText = "ERROR AL CARGAR DATOS DE LA RED";
+    signalBox.innerText = "ERROR DE RED. INTENTA DE NUEVO";
   }
 }
 
