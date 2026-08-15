@@ -1,11 +1,16 @@
 const fetch = require('node-fetch');
 
-// Credenciales de Telegram proporcionadas
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "7852773411:AAFXnY-sZa_E_6AoUwId-_o1dUnFjh7gk4I";
-const CHAT_ID = process.env.CHAT_ID || "-1002195510743";
-const THREAD_ID = process.env.THREAD_ID || "6152";
+// Credenciales extraídas de los Secrets seguros de GitHub Actions
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const CHAT_ID = process.env.CHAT_ID;
+const THREAD_ID = process.env.THREAD_ID;
 
 async function sendTelegramAlert(message) {
+  if (!TELEGRAM_BOT_TOKEN || !CHAT_ID) {
+    console.error("[Telegram Error] Faltan configurar las credenciales en los Secrets de GitHub.");
+    return;
+  }
+
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
   
   const payload = {
@@ -152,8 +157,8 @@ const runScanner = async () => {
     } else {
       statusMessage += `⏳ Mercado Neutral. Sin acciones requeridas en este ciclo.`;
       console.log(`⏳ Mercado Neutral. Sin acciones requeridas.`);
-      // Opcional: puedes comentar la siguiente línea si no quieres que te escriba cada 4 horas cuando todo esté neutral
-      await sendTelegramAlert(statusMessage);
+      // Opcional: Descomenta la siguiente línea si deseas recibir el reporte neutral cada 4 horas
+      // await sendTelegramAlert(statusMessage);
     }
 
   } catch (error) {
