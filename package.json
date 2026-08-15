@@ -1,7 +1,7 @@
 {
   "name": "tactical-dca-scanner",
   "version": "1.0.0",
-  "description": "Scanner automático de estrategia DCA para Solana con GitHub Actions",
+  "description": "Scanner automático de estrategia DCA para Solana usando CoinGecko",
   "main": "scanner.js",
   "scripts": {
     "start": "node scanner.js"
