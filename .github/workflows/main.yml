@@ -1,4 +1,4 @@
-name: PAXG Tactical Scanner
+name: SOLANA Tactical Scanner
 
 on:
   schedule:
@@ -20,5 +20,5 @@ jobs:
       - name: Instalar Dependencias
         run: npm install
 
-      - name: Ejecutar Scanner de PAXG
+      - name: Ejecutar Scanner de Solana
         run: npm start
