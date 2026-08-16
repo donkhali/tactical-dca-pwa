@@ -103,10 +103,10 @@ const Indicators = {
 const runScanner = async () => {
   const symbol = 'SOLUSDT';
   const interval = '1d';
-  // Aumentamos a 1,000 velas para dar suficiente historial de calentamiento (warm-up) a la EMA 200
+  // Descarga directa y segura de 1,000 velas diarias en una sola petición estables
   const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=1000`;
 
-  console.log(`[Scanner] Descargando histórico optimizado de ${symbol} desde Binance...`);
+  console.log(`[Scanner] Descargando histórico de 1,000 velas para ${symbol} (${interval}) desde Binance...`);
 
   try {
     const response = await fetch(url);
@@ -116,6 +116,8 @@ const runScanner = async () => {
       console.error("[Error] La API de Binance no devolvió datos.");
       process.exit(1);
     }
+
+    console.log(`[Scanner] Velas totales cargadas con éxito: ${data.length}`);
 
     // Omitimos la última vela si está abierta/en curso para alinear el cierre con TradingView
     const closedCandles = data.slice(0, data.length - 1);
