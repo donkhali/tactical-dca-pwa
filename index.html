@@ -16,6 +16,7 @@
       --solana-gradient: linear-gradient(135deg, #00FFA3 0%, #DC1FFF 100%);
       --accent-green: #00FFA3;
       --accent-purple: #DC1FFF;
+      --accent-warning: #f59e0b;
       --border: #26262b;
     }
 
@@ -127,9 +128,22 @@
       border-color: var(--accent-purple);
     }
 
+    .signal-cross-down {
+      background-color: rgba(245, 158, 11, 0.15);
+      color: var(--accent-warning);
+      border-color: var(--accent-warning);
+      animation: pulse 1.5s infinite;
+    }
+
     .signal-neutral {
       background-color: rgba(156, 163, 175, 0.05);
       color: var(--text-muted);
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.6; }
+      100% { opacity: 1; }
     }
 
     .dashboard-grid {
@@ -294,7 +308,11 @@
       const obvEmaArr = Indicators.ema(obvArr, 20);
 
       const currentClose = closes[closes.length - 1];
+      const prevClose = closes[closes.length - 2];
+      
       const currentEma = ema200Arr[ema200Arr.length - 1];
+      const prevEma = ema200Arr[ema200Arr.length - 2];
+      
       const currentRsi = rsiArr[rsiArr.length - 1];
       
       const prevObv = obvArr[obvArr.length - 2];
@@ -303,6 +321,9 @@
       const currObvEma = obvEmaArr[obvEmaArr.length - 1];
       
       const obvCrossover = prevObv <= prevObvEma && currObv > currObvEma;
+
+      // Detección exacta del cruce de arriba hacia abajo de la EMA 200
+      const crossedBelowEma = prevClose >= prevEma && currentClose < currentEma;
 
       const isDowntrend = currentClose < currentEma;
       const condBuyDca = isDowntrend && currentRsi < 30;
@@ -314,7 +335,10 @@
       
       const signalBox = document.getElementById('signalDisplay');
       
-      if (condBuyDca) {
+      if (crossedBelowEma) {
+        signalBox.className = "signal-box signal-cross-down";
+        signalBox.innerText = "⚠️ ¡ALERTA: CRUCE BAJISTA DE EMA 200 DETECTADO!";
+      } else if (condBuyDca) {
         signalBox.className = "signal-box signal-dca";
         signalBox.innerText = "🚨 SEÑAL ACTIVA: INICIAR DCA (COMPRAR)";
       } else if (condSell) {
