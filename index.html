@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Solana Tactical DCA</title>
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#121212">
+  <link rel="apple-touch-icon" href="logo.png">
   <style>
     :root {
       --bg-main: #0a0a0c;
@@ -41,9 +43,22 @@
       padding-bottom: 16px;
     }
 
+    .header-title-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .app-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
     h1 {
-      font-size: 1.35rem;
-      text-align: center;
+      font-size: 1.25rem;
       background: var(--solana-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -146,9 +161,12 @@
 </head>
 <body>
   <header>
-    <h1>Estrategia Táctica Solana</h1>
+    <div class="header-title-container">
+      <img src="logo.png" alt="Logo Solana" class="app-logo">
+      <h1>Estrategia Táctica Solana</h1>
+    </div>
     <div class="controls">
-      <span class="asset-title"><span class="dot"></span> SOL / USD</span>
+      <span class="asset-title"><span class="dot"></span> SOL / USD (1D)</span>
       <button id="analyzeBtn">Actualizar</button>
     </div>
   </header>
@@ -173,7 +191,6 @@
   </div>
 
   <script>
-    // 1. Motor de Indicadores Técnicos
     const Indicators = {
       ema(data, period) {
         const k = 2 / (period + 1);
@@ -236,7 +253,6 @@
       }
     };
 
-    // 2. Lógica de Aplicación
     document.addEventListener('DOMContentLoaded', () => {
       const analyzeBtn = document.getElementById('analyzeBtn');
       if (analyzeBtn) {
@@ -250,7 +266,7 @@
       signalBox.className = "signal-box signal-neutral";
       signalBox.innerText = "DESCARGANDO DATOS DE SOLANA...";
 
-      const url = 'https://api.binance.com/api/v3/klines?symbol=SOLUSDT&interval=1d&limit=250';
+      const url = 'https://api.binance.com/api/v3/klines?symbol=SOLUSDT&interval=1d&limit=1000';
 
       try {
         const response = await fetch(url);
@@ -260,8 +276,9 @@
           throw new Error("No hay datos disponibles");
         }
 
-        const closes = data.map(candle => parseFloat(candle[4]));
-        const volumes = data.map(candle => parseFloat(candle[5]));
+        const closedCandles = data.slice(0, data.length - 1);
+        const closes = closedCandles.map(candle => parseFloat(candle[4]));
+        const volumes = closedCandles.map(candle => parseFloat(candle[5]));
 
         runStrategy(closes, volumes);
       } catch (error) {
