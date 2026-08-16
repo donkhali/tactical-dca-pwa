@@ -52,6 +52,7 @@ const Indicators = {
     return emaArray;
   },
 
+  // RSI adaptado con la suavización exacta de Wilder (idéntico a TradingView)
   rsi(closes, period = 14) {
     let gains = 0;
     let losses = 0;
@@ -102,9 +103,10 @@ const Indicators = {
 const runScanner = async () => {
   const symbol = 'SOLUSDT';
   const interval = '1d';
-  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=250`;
+  // Aumentamos a 1,000 velas para dar suficiente historial de calentamiento (warm-up) a la EMA 200
+  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=1000`;
 
-  console.log(`[Scanner] Descargando datos de ${symbol} desde Binance...`);
+  console.log(`[Scanner] Descargando histórico optimizado de ${symbol} desde Binance...`);
 
   try {
     const response = await fetch(url);
@@ -115,8 +117,11 @@ const runScanner = async () => {
       process.exit(1);
     }
 
-    const closes = data.map(candle => parseFloat(candle[4]));
-    const volumes = data.map(candle => parseFloat(candle[5]));
+    // Omitimos la última vela si está abierta/en curso para alinear el cierre con TradingView
+    const closedCandles = data.slice(0, data.length - 1);
+
+    const closes = closedCandles.map(candle => parseFloat(candle[4]));
+    const volumes = closedCandles.map(candle => parseFloat(candle[5]));
 
     const ema200Arr = Indicators.ema(closes, 200);
     const rsiArr = Indicators.rsi(closes, 14);
@@ -151,7 +156,7 @@ const runScanner = async () => {
       console.log(`🚨 [ALERTA] ¡SEÑAL DE COMPRA DCA ACTIVADA PARA SOLANA!`);
       await sendTelegramAlert(statusMessage);
     } else if (condSell) {
-      statusMessage += `🚨 *¡SEÑAL ACTIVA: VENDER / SALIR!*\nSe ha detectado un cruce alcista en el OBV. Fin de la capitulación.`;
+      statusMessage += `🚨 *¡SEÑAL ACTIVA: VENDER / SALIR!*\nSe ha detectado un cruce alcista en el OBV.`;
       console.log(`🚨 [ALERTA] ¡SEÑAL DE VENTA ACTIVADA PARA SOLANA!`);
       await sendTelegramAlert(statusMessage);
     } else {
