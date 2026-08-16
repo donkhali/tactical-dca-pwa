@@ -1,15 +1,16 @@
 {
-  "name": "Tactical DCA & OBV Strategy",
-  "short_name": "TacticalDCA",
-  "start_url": "/",
+  "name": "Solana Tactical DCA",
+  "short_name": "SolanaDCA",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#3b82f6",
+  "background_color": "#0a0a0c",
+  "theme_color": "#121212",
   "icons": [
     {
-      "src": "https://raw.githubusercontent.com/feathericons/feather/master/icons/trending-up.svg",
-      "sizes": "192x192 512x512",
-      "type": "image/svg+xml"
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
